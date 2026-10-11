@@ -1,46 +1,239 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#f7f5ef">
-<title>原稿用紙エディタ</title>
-<style>
-:root{color-scheme:light dark;--bg:light-dark(#f5f3ed,#171a20);--panel:light-dark(#fffefa,#222731);--ink:light-dark(#20242b,#f1f3f5);--muted:light-dark(#737781,#aab0ba);--accent:light-dark(#315d50,#83b5a3);--border:light-dark(#e1ded5,#3a414d)}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif}.app{min-height:100vh;background:var(--bg)}header{padding:22px clamp(16px,4vw,48px) 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:16px}.eyebrow{font-size:11px;letter-spacing:.16em;color:var(--muted)}.brand{font-size:clamp(22px,3vw,31px);margin:4px 0 0}.header-note{font-size:12px;color:var(--muted)}main{display:grid;grid-template-columns:290px minmax(0,1fr);gap:22px;padding:22px clamp(12px,3vw,38px) 32px;max-width:1600px;margin:auto}.controls{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:18px;height:max-content;position:sticky;top:16px}.section-title{font-size:12px;font-weight:750;letter-spacing:.08em;color:var(--muted);margin:0 0 14px}.field{margin:0 0 14px}.field label{display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:650;margin-bottom:7px}.field small{font-size:11px;color:var(--muted);font-weight:400}select,input[type=number],input[type=text]{width:100%;min-width:0;border:1px solid var(--border);border-radius:8px;padding:10px;background:var(--bg);color:var(--ink);font:inherit;font-size:13px}input[type=color]{width:42px;height:30px;border:0;padding:0;background:transparent;cursor:pointer}input[type=range]{width:100%;accent-color:var(--accent)}.pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}.color-row{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--border);border-radius:8px;padding:5px 9px}.segmented{display:grid;grid-template-columns:1fr 1fr;gap:5px;background:var(--bg);padding:4px;border:1px solid var(--border);border-radius:9px}.segmented button,.btn{border:1px solid var(--border);border-radius:8px;padding:10px 12px;font:inherit;font-size:13px;font-weight:650;cursor:pointer;background:var(--panel);color:var(--ink)}.segmented button{border:0;background:transparent;color:var(--muted)}.segmented button.active{background:var(--accent);color:white}.btn.primary{background:#315d50;border-color:#315d50;color:#fff}.buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:18px}.buttons .primary{grid-column:1/-1}.help{font-size:11px;line-height:1.75;color:var(--muted);margin-top:14px}.workspace{min-width:0}.workspace-top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:0 0 12px;flex-wrap:wrap}.workspace-top h2{font-size:15px;margin:0}.paper-wrap{background:light-dark(#e8e5de,#12151a);border:1px solid var(--border);border-radius:13px;padding:clamp(12px,3vw,30px);overflow:auto;min-height:500px;display:flex;justify-content:flex-start;align-items:flex-start}.paper{--rows:20;--cols:20;--cell:28px;--grid-color:#d5a7a7;width:calc(var(--cols)*var(--cell));height:calc(var(--rows)*var(--cell));flex:0 0 auto;background-color:#fffdf8;background-image:linear-gradient(to right,var(--grid-color) 1px,transparent 1px),linear-gradient(to bottom,var(--grid-color) 1px,transparent 1px);background-size:var(--cell) var(--cell);border:1px solid var(--grid-color);position:relative;box-shadow:0 5px 22px #0002;overflow:hidden}.paper textarea{display:block;position:absolute;inset:0;width:100%;height:100%;resize:none;border:0;border-radius:0;outline:0;background:transparent;color:#202020;padding:0;margin:0;font-family:"Yu Mincho","Hiragino Mincho ProN","Noto Serif JP",serif;font-size:var(--text-size,18px);line-height:var(--cell);letter-spacing:0;white-space:pre-wrap;overflow:auto;tab-size:2;overscroll-behavior:contain}.paper.vertical textarea{writing-mode:vertical-rl;text-orientation:upright;line-height:var(--cell);overflow-x:auto;overflow-y:hidden}.paper.horizontal textarea{writing-mode:horizontal-tb}.paper textarea::placeholder{color:#999;opacity:.7}.paper-meta{font-size:12px;color:var(--muted);display:flex;justify-content:space-between;gap:12px;margin-top:11px;flex-wrap:wrap}.preview-label{background:var(--panel);border:1px solid var(--border);padding:5px 9px;border-radius:99px;font-size:11px;color:var(--muted)}.save-state{font-size:11px;color:var(--muted);margin-top:8px;min-height:1em}@media(max-width:850px){main{grid-template-columns:1fr}.controls{position:static}.paper-wrap{min-height:400px}.header-note{display:none}}@media print{@page{size:auto;margin:10mm}html,body,.app{background:white!important;color:#111!important;margin:0!important}.app>header,.controls,.workspace-top,.paper-meta,.save-state{display:none!important}main{display:block;padding:0;margin:0;max-width:none}.workspace{width:100%}.paper-wrap{display:block;padding:0;background:white;border:0;border-radius:0;overflow:visible;min-height:0}.paper{box-shadow:none;margin:0 auto;break-inside:avoid;print-color-adjust:exact;-webkit-print-color-adjust:exact}.paper textarea{overflow:hidden!important;color:#111!important;print-color-adjust:exact;-webkit-print-color-adjust:exact}.paper textarea::placeholder{color:transparent}.paper{max-width:100%}}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>原稿用紙エディタ</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- html2pdf.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        .genkou-cell {
+            width: 34px;
+            height: 34px;
+            border: 1px solid var(--line-color, #ffb3b3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            outline: none;
+            box-sizing: border-box;
+            background: transparent;
+            font-size: 1.1rem;
+            caret-color: #2563eb;
+        }
+        .genkou-cell:focus {
+            background-color: rgba(239, 246, 255, 0.6);
+            border-color: #2563eb;
+            z-index: 10;
+        }
+    </style>
 </head>
-<body><div class="app">
-<header><div><div class="eyebrow">WRITING STUDIO / JAPANESE MANUSCRIPT</div><h1 class="brand">原稿用紙エディタ</h1></div><div class="header-note">書く・整える・保存する。</div></header>
-<main><aside class="controls" aria-label="原稿用紙の設定"><p class="section-title">用紙と文字の設定</p>
-<div class="field"><label>書字方向</label><div class="segmented"><button id="horizontalBtn" class="active" type="button" aria-pressed="true">横書き</button><button id="verticalBtn" type="button" aria-pressed="false">縦書き</button></div></div>
-<div class="pair"><div class="field"><label for="rows">縦（マス数）</label><input id="rows" type="number" min="5" max="60" step="1" value="20"></div><div class="field"><label for="cols">横（マス数）</label><input id="cols" type="number" min="5" max="60" step="1" value="20"></div></div>
-<div class="field"><label for="cellSize">マスの大きさ <small id="cellLabel">28 px</small></label><input id="cellSize" type="range" min="18" max="42" value="28"></div>
-<div class="field"><label for="gridColor">罫線の色</label><div class="color-row"><span style="font-size:12px">マス目・外枠</span><input id="gridColor" type="color" value="#d5a7a7" aria-label="罫線の色"></div></div>
-<div class="field"><label for="font">フォント</label><select id="font"><option value='"Yu Mincho","Hiragino Mincho ProN","Noto Serif JP",serif'>明朝体</option><option value='"Yu Gothic","Hiragino Kaku Gothic ProN",sans-serif'>ゴシック体</option><option value='serif'>標準セリフ</option><option value='sans-serif'>標準サンセリフ</option><option value='monospace'>等幅</option></select></div>
-<div class="field"><label for="fontSize">文字サイズ <small id="fontLabel">18 px</small></label><input id="fontSize" type="range" min="12" max="36" value="18"></div>
-<div class="field"><label for="title">ファイル名・タイトル</label><input id="title" type="text" maxlength="80" placeholder="例：志望理由書"></div>
-<div class="buttons"><button class="btn primary" id="pdfBtn" type="button">PDF保存・印刷</button><button class="btn" id="txtBtn" type="button">TXT保存</button><button class="btn" id="clearBtn" type="button">本文を消去</button><button class="btn" id="resetBtn" type="button">設定を初期化</button></div>
-<p class="help">本文はこのブラウザに自動保存されます。同じブラウザで開き直すと復元できます。PDF保存は印刷画面で「PDFとして保存」を選び、用紙サイズ・倍率・余白を確認してください。</p>
-</aside>
-<section class="workspace"><div class="workspace-top"><h2>執筆エリア</h2><span class="preview-label" id="orientationLabel">横書きプレビュー</span></div><div class="paper-wrap"><div class="paper horizontal" id="paper"><textarea id="bodyText" spellcheck="false" aria-label="原稿用紙本文" placeholder="ここから書き始めてください。&#10;入力した文章が原稿用紙に表示されます。"></textarea></div></div><div class="paper-meta"><span id="dimensions">20行 × 20列</span><span id="count">0文字</span><span id="capacity">400マス</span></div><div class="save-state" id="saveState" role="status" aria-live="polite">このブラウザに自動保存します。</div></section></main></div>
-<script>
-'use strict';
-const $=id=>document.getElementById(id);
-const STORAGE_KEY='manuscript-editor-v2';
-const DEFAULTS={direction:'horizontal',rows:20,cols:20,cellSize:28,gridColor:'#d5a7a7',font:'"Yu Mincho","Hiragino Mincho ProN","Noto Serif JP",serif',fontSize:18,title:'',bodyText:''};
-let settings={...DEFAULTS};
-function clamp(value,min,max){const n=Number.parseInt(value,10);return Number.isFinite(n)?Math.min(max,Math.max(min,n)):min;}
-function readControls(){settings.rows=clamp($('rows').value,5,60);settings.cols=clamp($('cols').value,5,60);settings.cellSize=clamp($('cellSize').value,18,42);settings.fontSize=clamp($('fontSize').value,12,36);settings.gridColor=$('gridColor').value;settings.font=$('font').value;settings.title=$('title').value;settings.bodyText=$('bodyText').value;}
-function render(){readControls();const p=$('paper'),cell=settings.cellSize;p.style.setProperty('--rows',settings.rows);p.style.setProperty('--cols',settings.cols);p.style.setProperty('--cell',cell+'px');p.style.setProperty('--grid-color',settings.gridColor);p.style.setProperty('--text-size',settings.fontSize+'px');p.style.width=(settings.cols*cell)+'px';p.style.height=(settings.rows*cell)+'px';p.className='paper '+settings.direction;$('bodyText').style.fontFamily=settings.font;$('cellLabel').textContent=cell+' px';$('fontLabel').textContent=settings.fontSize+' px';$('orientationLabel').textContent=(settings.direction==='vertical'?'縦書き':'横書き')+'プレビュー';$('horizontalBtn').classList.toggle('active',settings.direction==='horizontal');$('verticalBtn').classList.toggle('active',settings.direction==='vertical');$('horizontalBtn').setAttribute('aria-pressed',String(settings.direction==='horizontal'));$('verticalBtn').setAttribute('aria-pressed',String(settings.direction==='vertical'));$('dimensions').textContent=settings.rows+'行 × '+settings.cols+'列';$('count').textContent=settings.bodyText.length.toLocaleString('ja-JP')+'文字';$('capacity').textContent=(settings.rows*settings.cols).toLocaleString('ja-JP')+'マス';}
-function saveState(){try{readControls();localStorage.setItem(STORAGE_KEY,JSON.stringify(settings));$('saveState').textContent='保存済み · '+new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});}catch(error){$('saveState').textContent='自動保存できません。TXT保存でバックアップしてください。';}}
-function updateAndSave(){render();saveState();}
-function restore(){try{const stored=localStorage.getItem(STORAGE_KEY);if(!stored)return;const data=JSON.parse(stored);if(!data||typeof data!=='object')return;settings={...DEFAULTS,...data};settings.direction=settings.direction==='vertical'?'vertical':'horizontal';$('rows').value=clamp(settings.rows,5,60);$('cols').value=clamp(settings.cols,5,60);$('cellSize').value=clamp(settings.cellSize,18,42);$('fontSize').value=clamp(settings.fontSize,12,36);$('gridColor').value=/^#[0-9a-f]{6}$/i.test(settings.gridColor)?settings.gridColor:DEFAULTS.gridColor;$('font').value=settings.font;$('title').value=String(settings.title||'').slice(0,80);$('bodyText').value=String(settings.bodyText||'');}catch(error){$('saveState').textContent='保存データを読み込めませんでした。';}}
-['rows','cols','cellSize','gridColor','font','fontSize','title'].forEach(id=>$(id).addEventListener('input',updateAndSave));$('bodyText').addEventListener('input',updateAndSave);
-$('horizontalBtn').addEventListener('click',()=>{settings.direction='horizontal';updateAndSave()});$('verticalBtn').addEventListener('click',()=>{settings.direction='vertical';updateAndSave()});
-$('pdfBtn').addEventListener('click',()=>{document.title=( $('title').value.trim()||'原稿用紙')+' - 原稿用紙エディタ';window.print()});
-$('txtBtn').addEventListener('click',()=>{const blob=new Blob(['\ufeff',$('bodyText').value],{type:'text/plain;charset=utf-8'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=( $('title').value.trim()||'原稿用紙').replace(/[\\/:*?"<>|]/g,'_')+'.txt';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);});
-$('clearBtn').addEventListener('click',()=>{if($('bodyText').value&&confirm('本文をすべて消去します。この操作は元に戻せません。続けますか？')){$('bodyText').value='';updateAndSave();$('bodyText').focus()}});
-$('resetBtn').addEventListener('click',()=>{if(confirm('用紙設定を初期値に戻しますか？本文は消去されません。')){const body=$('bodyText').value;settings={...DEFAULTS,bodyText:body};$('rows').value=DEFAULTS.rows;$('cols').value=DEFAULTS.cols;$('cellSize').value=DEFAULTS.cellSize;$('gridColor').value=DEFAULTS.gridColor;$('font').value=DEFAULTS.font;$('fontSize').value=DEFAULTS.fontSize;$('title').value='';settings.direction='horizontal';updateAndSave()}});
-window.addEventListener('beforeprint',()=>{render()});restore();render();
-</script></body></html>
+<body class="bg-slate-100 min-h-screen flex flex-col items-center p-4">
+
+    <!-- コントロールパネル -->
+    <div class="bg-white p-5 rounded-2xl shadow-md w-full max-w-5xl mb-6 flex flex-wrap gap-4 items-center justify-between">
+        <h1 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+            📝 原稿用紙エディタ
+        </h1>
+        
+        <div class="flex flex-wrap gap-3 items-center text-sm">
+            <!-- 方向 -->
+            <div>
+                <label class="block text-xs text-slate-500 mb-1">方向</label>
+                <select id="writingMode" class="border rounded-lg px-2 py-1.5 bg-slate-50">
+                    <option value="vertical-rl">縦書き</option>
+                    <option value="horizontal-tb">横書き</option>
+                </select>
+            </div>
+
+            <!-- フォント -->
+            <div>
+                <label class="block text-xs text-slate-500 mb-1">フォント</label>
+                <select id="fontFamily" class="border rounded-lg px-2 py-1.5 bg-slate-50">
+                    <option value="'Yu Mincho', YuMincho, 'MS Mincho', serif">游明朝</option>
+                    <option value="'Yu Gothic', YuGothic, 'MS Gothic', sans-serif">游ゴシック</option>
+                    <option value="'Hiragino Mincho ProN', 'Meiryo', serif">ヒラギノ明朝</option>
+                    <option value="'Courier New', Courier, monospace">等幅 (Courier)</option>
+                </select>
+            </div>
+
+            <!-- 線の色 -->
+            <div>
+                <label class="block text-xs text-slate-500 mb-1">線の色</label>
+                <input type="color" id="lineColor" value="#ffb3b3" class="w-10 h-9 border rounded-lg cursor-pointer bg-white p-1">
+            </div>
+
+            <!-- サイズ設定 (行数・文字数) -->
+            <div>
+                <label class="block text-xs text-slate-500 mb-1">縦の行数</label>
+                <input type="number" id="rowCount" value="20" min="5" max="50" class="border rounded-lg px-2 py-1.5 w-16 text-center bg-slate-50">
+            </div>
+
+            <div>
+                <label class="block text-xs text-slate-500 mb-1">1行の文字数</label>
+                <input type="number" id="colCount" value="20" min="5" max="50" class="border rounded-lg px-2 py-1.5 w-16 text-center bg-slate-50">
+            </div>
+
+            <!-- ボタン群 -->
+            <div class="flex items-end gap-2 mt-4 sm:mt-0">
+                <button id="updateGrid" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition font-medium shadow-sm">
+                    適用 / 再生成
+                </button>
+                <button id="savePdf" class="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition font-medium shadow-sm flex items-center gap-1">
+                    💾 PDF保存
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 原稿用紙表示エリア (PDF保存対象) -->
+    <div class="bg-white p-10 rounded-2xl shadow-xl overflow-auto max-w-full flex justify-center border border-slate-200">
+        <div id="pdfArea" class="p-4 bg-white">
+            <div id="genkouContainer" class="shadow-sm"></div>
+        </div>
+    </div>
+
+    <script>
+        function generateGrid() {
+            const rowCount = parseInt(document.getElementById('rowCount').value) || 20;
+            const colCount = parseInt(document.getElementById('colCount').value) || 20;
+            const writingMode = document.getElementById('writingMode').value;
+            const fontFamily = document.getElementById('fontFamily').value;
+            const lineColor = document.getElementById('lineColor').value;
+            
+            const container = document.getElementById('genkouContainer');
+            container.innerHTML = '';
+            container.style.setProperty('--line-color', lineColor);
+            container.style.fontFamily = fontFamily;
+
+            // コンテナ全体のスタイル
+            container.style.display = 'flex';
+            container.style.backgroundColor = 'white';
+            container.style.border = '2px solid #333';
+            container.style.boxSizing = 'border-box';
+
+            if (writingMode === 'vertical-rl') {
+                container.style.writingMode = 'vertical-rl';
+                container.style.flexDirection = 'row';
+            } else {
+                container.style.writingMode = 'horizontal-tb';
+                container.style.flexDirection = 'column';
+            }
+
+            const primaryCount = writingMode === 'vertical-rl' ? colCount : rowCount;
+            const secondaryCount = writingMode === 'vertical-rl' ? rowCount : colCount;
+
+            const gridCells = [];
+
+            for (let i = 0; i < primaryCount; i++) {
+                const lineDiv = document.createElement('div');
+                lineDiv.style.display = 'flex';
+                if (writingMode === 'vertical-rl') {
+                    lineDiv.style.flexDirection = 'column';
+                } else {
+                    lineDiv.style.flexDirection = 'row';
+                }
+
+                const rowCells = [];
+                for (let j = 0; j < secondaryCount; j++) {
+                    const cell = document.createElement('input');
+                    cell.type = 'text';
+                    cell.maxLength = 1;
+                    cell.className = 'genkou-cell';
+                    
+                    // 入力時の自動フォーカス移動
+                    cell.addEventListener('input', (e) => {
+                        if (e.target.value.length === 1) {
+                            focusNextCell(i, j, primaryCount, secondaryCount, writingMode, gridCells);
+                        }
+                    });
+
+                    // 矢印キーやバックスペースでの移動
+                    cell.addEventListener('keydown', (e) => {
+                        handleKeyNavigation(e, i, j, primaryCount, secondaryCount, writingMode, gridCells);
+                    });
+
+                    lineDiv.appendChild(cell);
+                    rowCells.push(cell);
+                }
+                container.appendChild(lineDiv);
+                gridCells.push(rowCells);
+            }
+        }
+
+        // 入力完了時に次のマスへ移動
+        function focusNextCell(r, c, maxR, maxC, mode, grid) {
+            if (mode === 'vertical-rl') {
+                // 縦書き：上から下へ、端まで行ったら左の列へ
+                if (c + 1 < maxC) {
+                    grid[r][c + 1].focus();
+                } else if (r + 1 < maxR) {
+                    grid[r + 1][0].focus();
+                }
+            } else {
+                // 横書き：左から右へ、端まで行ったら次の行へ
+                if (c + 1 < maxC) {
+                    grid[r][c + 1].focus();
+                } else if (r + 1 < maxR) {
+                    grid[r + 1][0].focus();
+                }
+            }
+        }
+
+        // キーボード操作のサポート
+        function handleKeyNavigation(e, r, c, maxR, maxC, mode, grid) {
+            let targetR = r;
+            let targetC = c;
+
+            if (e.key === 'ArrowRight') {
+                if (mode === 'vertical-rl') targetR = Math.max(0, r - 1); // 縦書きの右は前の列
+                else targetC = Math.min(maxC - 1, c + 1);
+            } else if (e.key === 'ArrowLeft') {
+                if (mode === 'vertical-rl') targetR = Math.min(maxR - 1, r + 1); // 縦書きの左は次の列
+                else targetC = Math.max(0, c - 1);
+            } else if (e.key === 'ArrowDown') {
+                if (mode === 'vertical-rl') targetC = Math.min(maxC - 1, c + 1); // 縦書きの下は下のマス
+                else targetR = Math.min(maxR - 1, r + 1);
+            } else if (e.key === 'ArrowUp') {
+                if (mode === 'vertical-rl') targetC = Math.max(0, c - 1); // 縦書きの上は上のマス
+                else targetR = Math.max(0, r - 1);
+            } else if (e.key === 'Backspace' && e.target.value === '') {
+                // バックスペースで空のとき、前のマスに戻る
+                if (mode === 'vertical-rl') {
+                    if (c > 0) targetC = c - 1;
+                    else if (r > 0) { targetR = r - 1; targetC = maxC - 1; }
+                } else {
+                    if (c > 0) targetC = c - 1;
+                    else if (r > 0) { targetR = r - 1; targetC = maxC - 1; }
+                }
+            }
+
+            if (targetR !== r || targetC !== c) {
+                e.preventDefault();
+                grid[targetR][targetC].focus();
+            }
+        }
+
+        // PDF保存機能
+        document.getElementById('savePdf').addEventListener('click', () => {
+            const element = document.getElementById('pdfArea');
+            const opt = {
+                margin:       10,
+                filename:     'genkou_youshi.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            html2pdf().from(element).set(opt).save();
+        });
+
+        // イベントリスナーの設定
+        document.getElementById('updateGrid').addEventListener('click', generateGrid);
+
+        // 初期生成
+        window.onload = generateGrid;
+    </script>
+</body>
+</html>
