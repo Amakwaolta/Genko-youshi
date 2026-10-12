@@ -7,80 +7,24 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .genkou-cell {
-            width: 36px;
-            height: 36px;
-            min-width: 36px;
-            min-height: 36px;
-            max-width: 36px;
-            max-height: 36px;
-            border: 1px solid var(--line-color, #ffb3b3);
-            margin: 0;
-            padding: 0;
-            display: inline-flex;
+        .page-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 24px;
+            display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: center;
-            text-align: center;
-            outline: none;
-            box-sizing: border-box;
-            background: transparent;
-            font-size: 1.1rem;
-            line-height: 1;
-            -webkit-user-select: text;
-            user-select: text;
-            flex-shrink: 0;
-        }
-        .genkou-cell:focus {
-            background-color: rgba(239, 246, 255, 0.9);
-            border-color: #2563eb;
-            z-index: 10;
-        }
-
-        /* 印刷・PDF保存時のスタイル設定（Safari完全対応） */
-        @media print {
-            body * {
-                visibility: hidden;
-            }
-            #pdfArea, #pdfArea * {
-                visibility: visible;
-            }
-            #pdfArea {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-                background: white !important;
-                padding: 0 !important;
-            }
-            .no-print {
-                display: none !important;
-            }
-            .genkou-page-wrapper {
-                page-break-after: always;
-                break-after: page;
-                page-break-inside: avoid;
-                break-inside: avoid;
-                margin: 0 auto;
-                padding: 20px;
-                background: white !important;
-                box-shadow: none !important;
-                border: none !important;
-            }
-            .genkou-cell {
-                background-color: transparent !important;
-                border-color: var(--line-color, #ffb3b3) !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
         }
     </style>
 </head>
 <body class="bg-slate-100 min-h-screen flex flex-col items-center p-4">
 
     <!-- コントロールパネル -->
-    <div class="no-print bg-white p-5 rounded-2xl shadow-md w-full max-w-6xl mb-4 flex flex-wrap gap-4 items-center justify-between">
+    <div class="bg-white p-5 rounded-2xl shadow-md w-full max-w-6xl mb-4 flex flex-wrap gap-4 items-center justify-between">
         <h1 class="text-xl font-bold text-slate-800 flex items-center gap-2">
-            📝 原稿用紙エディタ
+            📝 原稿用紙エディタ (完全安定版)
         </h1>
         
         <div class="flex flex-wrap gap-3 items-center text-sm">
@@ -88,8 +32,8 @@
             <div>
                 <label class="block text-xs text-slate-500 mb-1">方向</label>
                 <select id="writingMode" class="border rounded-lg px-2 py-1.5 bg-slate-50">
-                    <option value="vertical-rl">縦書き</option>
-                    <option value="horizontal-tb">横書き</option>
+                    <option value="vertical">縦書き</option>
+                    <option value="horizontal">横書き</option>
                 </select>
             </div>
 
@@ -137,42 +81,33 @@
                 <button id="updateGrid" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition font-medium shadow-sm">
                     適用 / 再生成
                 </button>
-                <button id="savePdf" class="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition font-medium shadow-sm flex items-center gap-1">
-                    💾 PDF保存
-                </button>
             </div>
         </div>
     </div>
 
     <!-- コピペ・一括入出力パネル -->
-    <div class="no-print bg-white p-4 rounded-2xl shadow-md w-full max-w-6xl mb-4 flex flex-col gap-2">
+    <div class="bg-white p-4 rounded-2xl shadow-md w-full max-w-6xl mb-4 flex flex-col gap-2">
         <div class="flex justify-between items-center">
-            <span class="text-sm font-bold text-slate-700">📋 テキスト一括入出力（改行対応・複数ページ自動拡張）</span>
+            <span class="text-sm font-bold text-slate-700">📋 テキスト入力（改行対応・自動ページ拡張）</span>
             <div class="flex gap-2">
                 <button id="importTextBtn" class="bg-blue-500 text-white text-xs px-3 py-1.5 rounded-lg hover:bg-blue-600 transition">
-                    テキストを原稿用紙に反映
-                </button>
-                <button id="exportTextBtn" class="bg-slate-600 text-white text-xs px-3 py-1.5 rounded-lg hover:bg-slate-700 transition">
-                    原稿用紙からテキストを取得
+                    原稿用紙に文章を反映
                 </button>
             </div>
         </div>
-        <textarea id="bulkText" rows="3" placeholder="ここに文章を貼り付けて「テキストを原稿用紙に反映」を押すと、改行や長さに応じて自動で複数ページに綺麗に流し込まれます。" class="border rounded-lg p-2 text-sm bg-slate-50 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+        <textarea id="bulkText" rows="4" placeholder="ここに文章を入力または貼り付けて「原稿用紙に文章を反映」を押してください。改行もそのまま綺麗な原稿用紙に反映され、長さに応じてページが自動追加されます。" class="border rounded-lg p-2 text-sm bg-slate-50 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
     </div>
 
-    <!-- 原稿用紙表示エリア -->
-    <div class="bg-white p-6 rounded-2xl shadow-xl w-full max-w-6xl h-[65vh] overflow-auto flex flex-col items-center border border-slate-200 gap-8">
-        <div id="pdfArea" class="bg-white flex flex-col items-center w-full p-4">
-            <div id="pagesContainer" class="flex flex-col items-center gap-8 w-full"></div>
-        </div>
+    <!-- 原稿用紙プレビュー・画像保存エリア -->
+    <div class="w-full max-w-6xl flex flex-col items-center gap-6">
+        <div class="text-xs text-slate-500">※ 各ページの「📷 このページを画像として保存」ボタンを押すと、綺麗なPNG画像として保存できます。</div>
+        <div id="pagesContainer" class="w-full flex flex-col items-center gap-6"></div>
     </div>
 
     <script>
-        let allPagesCells = []; 
-        let primaryMax = 0;
-        let secondaryMax = 0;
+        const CELL_SIZE = 36; // 1マスのピクセルサイズ
 
-        function generateGrid() {
+        function renderEditor() {
             const rowCount = parseInt(document.getElementById('rowCount').value) || 20;
             const colCount = parseInt(document.getElementById('colCount').value) || 20;
             const pageCount = parseInt(document.getElementById('pageCount').value) || 1;
@@ -180,271 +115,240 @@
             const fontFamily = document.getElementById('fontFamily').value;
             const lineColor = document.getElementById('lineColor').value;
             
+            const text = document.getElementById('bulkText').value;
             const container = document.getElementById('pagesContainer');
             container.innerHTML = '';
-            container.style.fontFamily = fontFamily;
 
-            primaryMax = writingMode === 'vertical-rl' ? colCount : rowCount;
-            secondaryMax = writingMode === 'vertical-rl' ? rowCount : colCount;
-
-            allPagesCells = [];
+            // テキストをページ・行・列のグリッドデータに変換するロジック
+            const pagesData = parseTextToPages(text, rowCount, colCount, pageCount, writingMode);
 
             for (let p = 0; p < pageCount; p++) {
-                const pageWrapper = document.createElement('div');
-                pageWrapper.className = 'genkou-page-wrapper flex flex-col items-center shadow-sm relative rounded-xl border border-slate-200';
-                pageWrapper.style.width = 'fit-content';
+                const pageCard = document.createElement('div');
+                pageCard.className = 'page-card w-full max-w-full overflow-auto';
 
-                const pageNumLabel = document.createElement('div');
-                pageNumLabel.className = 'no-print text-xs text-slate-400 mb-2 font-medium';
-                pageNumLabel.textContent = `- ${p + 1} -`;
-                pageWrapper.appendChild(pageNumLabel);
+                // ページ番号と画像保存ボタンのヘッダー
+                const header = document.createElement('div');
+                header.className = 'flex justify-between items-center w-full mb-3 px-2';
+                header.innerHTML = `
+                    <span class="text-xs font-bold text-slate-500">- ページ ${p + 1} -</span>
+                    <button class="save-img-btn bg-emerald-600 text-white text-xs px-3 py-1.5 rounded-lg hover:bg-emerald-700 transition flex items-center gap-1" data-page="${p}">
+                        📷 このページを画像として保存
+                    </button>
+                `;
+                pageCard.appendChild(header);
 
-                const gridContainer = document.createElement('div');
-                gridContainer.style.setProperty('--line-color', lineColor);
-                gridContainer.style.display = 'flex';
-                gridContainer.style.backgroundColor = 'white';
-                gridContainer.style.border = '2px solid #333';
-                gridContainer.style.boxSizing = 'content-box';
-                gridContainer.style.padding = '4px';
+                // SVG原稿用紙の生成
+                const svg = createGenkouSvg(pagesData[p], rowCount, colCount, writingMode, fontFamily, lineColor);
+                svg.id = `svg-page-${p}`;
+                pageCard.appendChild(svg);
+                container.appendChild(pageCard);
+            }
 
-                if (writingMode === 'vertical-rl') {
-                    gridContainer.style.writingMode = 'vertical-rl';
-                    gridContainer.style.flexDirection = 'row';
-                } else {
-                    gridContainer.style.writingMode = 'horizontal-tb';
-                    gridContainer.style.flexDirection = 'column';
+            // 画像保存ボタンのイベント設定
+            document.querySelectorAll('.save-img-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const pageIndex = e.currentTarget.getAttribute('data-page');
+                    downloadSvgAsImage(pageIndex, p => `genkou_page_${p + 1}.png`);
+                });
+            });
+        }
+
+        // テキストを解析して各ページのマス目に割り振る
+        function parseTextToPages(text, rows, cols, totalPages, mode) {
+            // pages[p][row][col]
+            const pages = [];
+            for (let p = 0; p < totalPages; p++) {
+                const page = [];
+                for (let r = 0; r < rows; r++) {
+                    page.push(new Array(cols).fill(''));
                 }
+                pages.push(page);
+            }
 
-                const pageCells = [];
-                for (let i = 0; i < primaryMax; i++) {
-                    const lineDiv = document.createElement('div');
-                    lineDiv.style.display = 'flex';
-                    lineDiv.style.flexShrink = '0';
-                    if (writingMode === 'vertical-rl') {
-                        lineDiv.style.flexDirection = 'column';
+            let p = 0, r = 0, c = 0;
+            let charIndex = 0;
+
+            while (charIndex < text.length && p < totalPages) {
+                let char = text[charIndex];
+
+                if (char === '\n' || char === '\r') {
+                    if (char === '\r' && text[charIndex + 1] === '\n') charIndex++;
+                    // 改行処理：縦書き・横書き共通で次の行/列の先頭へ
+                    if (mode === 'vertical') {
+                        r++;
+                        c = 0;
+                        if (r >= rows) { p++; r = 0; c = 0; }
                     } else {
-                        lineDiv.style.flexDirection = 'row';
+                        r++;
+                        c = 0;
+                        if (r >= rows) { p++; r = 0; c = 0; }
                     }
+                    charIndex++;
+                    continue;
+                }
 
-                    const rowCells = [];
-                    for (let j = 0; j < secondaryMax; j++) {
-                        const cell = document.createElement('div');
-                        cell.contentEditable = true;
-                        cell.className = 'genkou-cell';
-                        
-                        cell.addEventListener('input', (e) => {
-                            let text = cell.textContent;
-                            if (text.length > 1) {
-                                cell.textContent = text.slice(-1);
-                                const range = document.createRange();
-                                const sel = window.getSelection();
-                                range.selectNodeContents(cell);
-                                range.collapse(false);
-                                sel.removeAllRanges();
-                                sel.addRange(range);
-                            }
-                            if (cell.textContent.length === 1) {
-                                focusNextCell(p, i, j, primaryMax, secondaryMax);
-                            }
-                        });
-
-                        cell.addEventListener('keydown', (e) => {
-                            handleKeyNavigation(e, p, i, j, primaryMax, secondaryMax, writingMode, cell);
-                        });
-
-                        lineDiv.appendChild(cell);
-                        rowCells.push(cell);
+                if (mode === 'vertical') {
+                    // 縦書き：上から下へ、端まで行ったら左の列へ
+                    if (r < rows && c < cols) {
+                        pages[p][r][c] = char;
                     }
-                    gridContainer.appendChild(lineDiv);
-                    pageCells.push(rowCells);
+                    r++;
+                    if (r >= rows) {
+                        r = 0;
+                        c++;
+                        if (c >= cols) {
+                            c = 0;
+                            p++;
+                        }
+                    }
+                } else {
+                    // 横書き：左から右へ、端まで行ったら次の行へ
+                    if (r < rows && c < cols) {
+                        pages[p][r][c] = char;
+                    }
+                    c++;
+                    if (c >= cols) {
+                        c = 0;
+                        r++;
+                        if (r >= rows) {
+                            r = 0;
+                            p++;
+                        }
+                    }
                 }
-
-                pageWrapper.appendChild(gridContainer);
-                container.appendChild(pageWrapper);
-                allPagesCells.push(pageCells);
+                charIndex++;
             }
+            return pages;
         }
 
-        function focusNextCell(p, r, c, maxR, maxC) {
-            if (c + 1 < maxC) {
-                allPagesCells[p][r][c + 1].focus();
-            } else if (r + 1 < maxR) {
-                allPagesCells[p][r + 1][0].focus();
-            } else if (p + 1 < allPagesCells.length) {
-                allPagesCells[p + 1][0][0].focus();
+        // SVGで原稿用紙を正確に描画
+        function createGenkouSvg(pageGrid, rows, cols, mode, fontFamily, lineColor) {
+            const width = cols * CELL_SIZE;
+            const height = rows * CELL_SIZE;
+
+            const svgNS = "http://www.w3.org/2000/svg";
+            const svg = document.createElementNS(svgNS, "svg");
+            svg.setAttribute("width", width);
+            svg.setAttribute("height", height);
+            svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+            svg.style.backgroundColor = "white";
+            svg.style.display = "block";
+            svg.style.margin = "0 auto";
+            svg.style.boxShadow = "0 1px 3px rgba(0,0,0,0.1)";
+
+            // 外枠
+            const borderRect = document.createElementNS(svgNS, "rect");
+            borderRect.setAttribute("x", "0");
+            borderRect.setAttribute("y", "0");
+            borderRect.setAttribute("width", width);
+            borderRect.setAttribute("height", height);
+            borderRect.setAttribute("fill", "white");
+            borderRect.setAttribute("stroke", "#333");
+            borderRect.setAttribute("stroke-width", "2");
+            svg.appendChild(borderRect);
+
+            // マス目と文字の描画
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    const x = c * CELL_SIZE;
+                    const y = r * CELL_SIZE;
+
+                    // マスの枠線
+                    const cellRect = document.createElementNS(svgNS, "rect");
+                    cellRect.setAttribute("x", x);
+                    cellRect.setAttribute("y", y);
+                    cellRect.setAttribute("width", CELL_SIZE);
+                    cellRect.setAttribute("height", CELL_SIZE);
+                    cellRect.setAttribute("fill", "none");
+                    cellRect.setAttribute("stroke", lineColor);
+                    cellRect.setAttribute("stroke-width", "1");
+                    svg.appendChild(cellRect);
+
+                    // 文字
+                    const char = pageGrid[r][c];
+                    if (char && char !== ' ') {
+                        const text = document.createElementNS(svgNS, "text");
+                        text.setAttribute("x", x + CELL_SIZE / 2);
+                        text.setAttribute("y", y + CELL_SIZE / 2);
+                        text.setAttribute("font-family", fontFamily);
+                        text.setAttribute("font-size", "20px");
+                        text.setAttribute("text-anchor", "middle");
+                        text.setAttribute("dominant-baseline", "central");
+                        text.setAttribute("fill", "#000");
+                        text.textContent = char;
+                        svg.appendChild(text);
+                    }
+                }
             }
+
+            return svg;
         }
 
-        function handleKeyNavigation(e, p, r, c, maxR, maxC, mode, cell) {
-            let targetP = p;
-            let targetR = r;
-            let targetC = c;
+        // SVGをPNG画像としてダウンロードする関数
+        function downloadSvgAsImage(pageIndex) {
+            const svg = document.getElementById(`svg-page-${pageIndex}`);
+            const svgData = new XMLSerializer().serializeToString(svg);
+            const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+            const URL = window.URL || window.webkitURL || window;
+            const blobURL = URL.createObjectURL(svgBlob);
 
-            if (e.key === 'ArrowRight') {
-                if (mode === 'vertical-rl') {
-                    targetR = Math.max(0, r - 1);
-                } else {
-                    if (c + 1 < maxC) targetC = c + 1;
-                    else if (p + 1 < allPagesCells.length) { targetP++; targetR = r; targetC = 0; }
-                }
-            } else if (e.key === 'ArrowLeft') {
-                if (mode === 'vertical-rl') {
-                    targetR = Math.min(maxR - 1, r + 1);
-                } else {
-                    if (c > 0) targetC = c - 1;
-                    else if (p > 0) { targetP--; targetR = r; targetC = maxC - 1; }
-                }
-            } else if (e.key === 'ArrowDown') {
-                if (mode === 'vertical-rl') {
-                    if (c + 1 < maxC) targetC = c + 1;
-                    else if (p + 1 < allPagesCells.length) { targetP++; targetR = 0; targetC = 0; }
-                } else {
-                    targetR = Math.min(maxR - 1, r + 1);
-                }
-            } else if (e.key === 'ArrowUp') {
-                if (mode === 'vertical-rl') {
-                    if (c > 0) targetC = c - 1;
-                    else if (p > 0) { targetP--; targetR = maxR - 1; targetC = maxC - 1; }
-                } else {
-                    targetR = Math.max(0, r - 1);
-                }
-            } else if (e.key === 'Enter') {
-                e.preventDefault();
-                if (r + 1 < maxR) {
-                    targetR = r + 1;
-                    targetC = 0;
-                } else if (p + 1 < allPagesCells.length) {
-                    targetP++;
-                    targetR = 0;
-                    targetC = 0;
-                }
-            } else if (e.key === 'Backspace' && cell.textContent === '') {
-                e.preventDefault();
-                if (c > 0) targetC = c - 1;
-                else if (r > 0) { targetR = r - 1; targetC = maxC - 1; }
-                else if (p > 0) { targetP--; targetR = maxR - 1; targetC = maxC - 1; }
-                
-                const targetCell = allPagesCells[targetP][targetR][targetC];
-                targetCell.textContent = '';
-                targetCell.focus();
-                return;
-            }
+            const image = new Image();
+            image.onload = () => {
+                const canvas = document.createElement('canvas');
+                // 高解像度（2倍）で綺麗に出力
+                const scale = 2;
+                canvas.width = svg.clientWidth * scale;
+                canvas.height = svg.clientHeight * scale;
+                const context = canvas.getContext('2d');
+                context.scale(scale, scale);
+                context.drawImage(image, 0, 0);
 
-            if (targetP !== p || targetR !== r || targetC !== c) {
-                e.preventDefault();
-                allPagesCells[targetP][targetR][targetC].focus();
-            }
+                const jpeg = canvas.toDataURL('image/png');
+                const trigger = document.createElement('a');
+                trigger.href = jpeg;
+                trigger.download = `genkou_page_${parseInt(pageIndex) + 1}.png`;
+                document.body.appendChild(trigger);
+                trigger.click();
+                document.body.removeChild(trigger);
+            };
+            image.src = blobURL;
         }
 
-        // テキスト一括流し込み（改行反映・自動ページ拡張）
+        // 自動ページ数計算とプレビュー更新
         document.getElementById('importTextBtn').addEventListener('click', () => {
             const text = document.getElementById('bulkText').value;
-            
+            const rows = parseInt(document.getElementById('rowCount').value) || 20;
+            const cols = parseInt(document.getElementById('colCount').value) || 20;
+            const mode = document.getElementById('writingMode').value;
+
+            // 文字数と改行から必要なページ数を自動計算
             let simP = 0, simR = 0, simC = 0;
             for (let i = 0; i < text.length; i++) {
                 let char = text[i];
                 if (char === '\n' || char === '\r') {
+                    if (char === '\r' && text[i + 1] === '\n') i++;
                     simR++;
                     simC = 0;
-                    if (simR >= primaryMax) {
-                        simP++;
-                        simR = 0;
-                        simC = 0;
-                    }
-                    if (char === '\r' && text[i+1] === '\n') i++;
+                    if (simR >= rows) { simP++; simR = 0; simC = 0; }
                     continue;
                 }
                 simC++;
-                if (simC >= secondaryMax) {
+                if (simC >= cols) {
                     simC = 0;
                     simR++;
-                }
-                if (simR >= primaryMax) {
-                    simP++;
-                    simR = 0;
-                    simC = 0;
+                    if (simR >= rows) { simP++; simR = 0; simC = 0; }
                 }
             }
             const neededPages = Math.max(1, simP + 1);
-            
             document.getElementById('pageCount').value = neededPages;
-            generateGrid();
 
-            let p = 0, r = 0, c = 0;
-            for (let page of allPagesCells) {
-                for (let row of page) {
-                    for (let cell of row) {
-                        cell.textContent = '';
-                    }
-                }
-            }
-
-            for (let i = 0; i < text.length; i++) {
-                let char = text[i];
-                if (char === '\n' / char === '\r') {
-                    r++;
-                    c = 0;
-                    if (r >= primaryMax) {
-                        p++;
-                        r = 0;
-                        c = 0;
-                    }
-                    if (p >= allPagesCells.length) break;
-                    if (char === '\r' && text[i+1] === '\n') i++;
-                    continue;
-                }
-                if (char === '\n') {
-                    r++;
-                    c = 0;
-                    if (r >= primaryMax) {
-                        p++;
-                        r = 0;
-                        c = 0;
-                    }
-                    if (p >= allPagesCells.length) break;
-                    continue;
-                }
-
-                if (p >= allPagesCells.length) break;
-                allPagesCells[p][r][c].textContent = char;
-
-                c++;
-                if (c >= secondaryMax) {
-                    c = 0;
-                    r++;
-                }
-                if (r >= primaryMax) {
-                    r = 0;
-                    p++;
-                }
-            }
+            renderEditor();
         });
 
-        // 原稿用紙からテキストを取得
-        document.getElementById('exportTextBtn').addEventListener('click', () => {
-            let fullText = '';
-            for (let p = 0; p < allPagesCells.length; p++) {
-                let pageCells = allPagesCells[p];
-                for (let i = 0; i < pageCells.length; i++) {
-                    let lineText = '';
-                    for (let j = 0; j < pageCells[i].length; j++) {
-                        const val = pageCells[i][j].textContent;
-                        lineText += val ? val : '　';
-                    }
-                    fullText += lineText.trimEnd() + '\n';
-                }
-            }
-            document.getElementById('bulkText').value = fullText.trim();
-        });
+        document.getElementById('updateGrid').addEventListener('click', renderEditor);
 
-        // PDF保存機能（Safariのネイティブ印刷・PDF保存機能を呼び出し）
-        document.getElementById('savePdf').addEventListener('click', () => {
-            window.print();
-        });
-
-        document.getElementById('updateGrid').addEventListener('click', generateGrid);
-
-        window.onload = generateGrid;
+        // 初期表示
+        window.onload = renderEditor;
     </script>
 </body>
 </html>
