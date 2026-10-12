@@ -6,8 +6,6 @@
     <title>原稿用紙エディタ</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- html2pdf.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         .genkou-cell {
             width: 36px;
@@ -37,23 +35,52 @@
             border-color: #2563eb;
             z-index: 10;
         }
-        /* PDF出力時の改ページ崩れ・切れ防止用 */
-        .genkou-page-wrapper {
-            page-break-after: always;
-            break-after: page;
-            page-break-inside: avoid;
-            break-inside: avoid;
-            padding: 20px;
-            background: #ffffff;
+
+        /* 印刷・PDF保存時のスタイル設定（Safari完全対応） */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #pdfArea, #pdfArea * {
+                visibility: visible;
+            }
+            #pdfArea {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                background: white !important;
+                padding: 0 !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .genkou-page-wrapper {
+                page-break-after: always;
+                break-after: page;
+                page-break-inside: avoid;
+                break-inside: avoid;
+                margin: 0 auto;
+                padding: 20px;
+                background: white !important;
+                box-shadow: none !important;
+                border: none !important;
+            }
+            .genkou-cell {
+                background-color: transparent !important;
+                border-color: var(--line-color, #ffb3b3) !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
         }
     </style>
 </head>
 <body class="bg-slate-100 min-h-screen flex flex-col items-center p-4">
 
     <!-- コントロールパネル -->
-    <div class="bg-white p-5 rounded-2xl shadow-md w-full max-w-6xl mb-4 flex flex-wrap gap-4 items-center justify-between">
+    <div class="no-print bg-white p-5 rounded-2xl shadow-md w-full max-w-6xl mb-4 flex flex-wrap gap-4 items-center justify-between">
         <h1 class="text-xl font-bold text-slate-800 flex items-center gap-2">
-            📝 原稿用紙エディタ (iPad対応版)
+            📝 原稿用紙エディタ
         </h1>
         
         <div class="flex flex-wrap gap-3 items-center text-sm">
@@ -118,7 +145,7 @@
     </div>
 
     <!-- コピペ・一括入出力パネル -->
-    <div class="bg-white p-4 rounded-2xl shadow-md w-full max-w-6xl mb-4 flex flex-col gap-2">
+    <div class="no-print bg-white p-4 rounded-2xl shadow-md w-full max-w-6xl mb-4 flex flex-col gap-2">
         <div class="flex justify-between items-center">
             <span class="text-sm font-bold text-slate-700">📋 テキスト一括入出力（改行対応・複数ページ自動拡張）</span>
             <div class="flex gap-2">
@@ -168,7 +195,7 @@
                 pageWrapper.style.width = 'fit-content';
 
                 const pageNumLabel = document.createElement('div');
-                pageNumLabel.className = 'text-xs text-slate-400 mb-2 font-medium';
+                pageNumLabel.className = 'no-print text-xs text-slate-400 mb-2 font-medium';
                 pageNumLabel.textContent = `- ${p + 1} -`;
                 pageWrapper.appendChild(pageNumLabel);
 
@@ -209,7 +236,6 @@
                             let text = cell.textContent;
                             if (text.length > 1) {
                                 cell.textContent = text.slice(-1);
-                                // カーソルを末尾に維持
                                 const range = document.createRange();
                                 const sel = window.getSelection();
                                 range.selectNodeContents(cell);
@@ -355,7 +381,7 @@
 
             for (let i = 0; i < text.length; i++) {
                 let char = text[i];
-                if (char === '\n' || char === '\r') {
+                if (char === '\n' / char === '\r') {
                     r++;
                     c = 0;
                     if (r >= primaryMax) {
@@ -365,6 +391,17 @@
                     }
                     if (p >= allPagesCells.length) break;
                     if (char === '\r' && text[i+1] === '\n') i++;
+                    continue;
+                }
+                if (char === '\n') {
+                    r++;
+                    c = 0;
+                    if (r >= primaryMax) {
+                        p++;
+                        r = 0;
+                        c = 0;
+                    }
+                    if (p >= allPagesCells.length) break;
                     continue;
                 }
 
@@ -400,19 +437,9 @@
             document.getElementById('bulkText').value = fullText.trim();
         });
 
-        // PDF保存機能
+        // PDF保存機能（Safariのネイティブ印刷・PDF保存機能を呼び出し）
         document.getElementById('savePdf').addEventListener('click', () => {
-            const element = document.getElementById('pdfArea');
-            const opt = {
-                margin:       10,
-                filename:     'genkou_youshi.pdf',
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true, logging: false },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                pagebreak:    { mode: ['css', 'legacy'], avoid: '.genkou-page-wrapper' }
-            };
-
-            html2pdf().from(element).set(opt).save();
+            window.print();
         });
 
         document.getElementById('updateGrid').addEventListener('click', generateGrid);
