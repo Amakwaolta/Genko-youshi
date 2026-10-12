@@ -374,32 +374,28 @@
             document.getElementById('bulkText').value = fullText.trim();
         });
 
-        // PDF保存機能（入力値が消えるバグを解消するため、一時的にテキスト描画要素に変換して保存）
-        document.getElementById('savePdf').addEventListener('click', async () => {
-            const originalArea = document.getElementById('pdfArea');
-            const cloneArea = originalArea.cloneNode(true);
-            
-            const originalInputs = originalArea.querySelectorAll('input.genkou-cell');
-            const cloneInputs = cloneArea.querySelectorAll('input.genkou-cell');
-            
-            // inputタグを静的なdiv（確実に画像化されるテキスト）に置換
-            cloneInputs.forEach((cloneInput, index) => {
-                const val = originalInputs[index].value;
+        // PDF保存機能（入力欄を一時的にテキストに置換して確実に綺麗に保存）
+        document.getElementById('savePdf').addEventListener('click', () => {
+            const inputs = document.querySelectorAll('input.genkou-cell');
+            const replacements = [];
+
+            // 保存の瞬間だけ input を div（テキスト描画）に置き換え
+            inputs.forEach(input => {
+                const val = input.value;
                 const div = document.createElement('div');
-                div.className = cloneInput.className;
-                div.style.cssText = cloneInput.style.cssText;
+                div.className = input.className;
+                div.style.cssText = input.style.cssText;
                 div.style.display = 'flex';
                 div.style.alignItems = 'center';
                 div.style.justifyContent = 'center';
                 div.style.backgroundColor = 'transparent';
                 div.textContent = val;
-                cloneInput.parentNode.replaceChild(div, cloneInput);
+                
+                input.parentNode.replaceChild(div, input);
+                replacements.push({ div, input, val });
             });
 
-            cloneArea.style.position = 'absolute';
-            cloneArea.style.left = '-9999px';
-            document.body.appendChild(cloneArea);
-
+            const element = document.getElementById('pdfArea');
             const opt = {
                 margin:       5,
                 filename:     'genkou_youshi.pdf',
@@ -409,11 +405,19 @@
                 pagebreak:    { mode: ['css', 'legacy'], avoid: '.genkou-page-wrapper' }
             };
 
-            try {
-                await html2pdf().from(cloneArea).set(opt).save();
-            } finally {
-                document.body.removeChild(cloneArea);
-            }
+            html2pdf().from(element).set(opt).save().then(() => {
+                // 保存完了後、瞬時に元の入力欄に戻す
+                replacements.forEach(r => {
+                    r.div.parentNode.replaceChild(r.input, r.div);
+                    r.input.value = r.val;
+                });
+            }).catch(() => {
+                // エラー時も元に戻す
+                replacements.forEach(r => {
+                    r.div.parentNode.replaceChild(r.input, r.div);
+                    r.input.value = r.val;
+                });
+            });
         });
 
         document.getElementById('updateGrid').addEventListener('click', generateGrid);
