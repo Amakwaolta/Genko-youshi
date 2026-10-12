@@ -10,10 +10,16 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         .genkou-cell {
-            width: 34px;
-            height: 34px;
+            width: 36px;
+            height: 36px;
+            min-width: 36px;
+            min-height: 36px;
+            max-width: 36px;
+            max-height: 36px;
             border: 1px solid var(--line-color, #ffb3b3);
-            display: flex;
+            margin: 0;
+            padding: 0;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
             text-align: center;
@@ -21,21 +27,24 @@
             box-sizing: border-box;
             background: transparent;
             font-size: 1.1rem;
-            caret-color: #2563eb;
+            line-height: 1;
+            -webkit-user-select: text;
+            user-select: text;
             flex-shrink: 0;
         }
         .genkou-cell:focus {
-            background-color: rgba(239, 246, 255, 0.8);
+            background-color: rgba(239, 246, 255, 0.9);
             border-color: #2563eb;
             z-index: 10;
         }
-        /* PDF出力時の改ページ崩れ防止用 */
+        /* PDF出力時の改ページ崩れ・切れ防止用 */
         .genkou-page-wrapper {
             page-break-after: always;
             break-after: page;
             page-break-inside: avoid;
             break-inside: avoid;
-            margin-bottom: 20px;
+            padding: 20px;
+            background: #ffffff;
         }
     </style>
 </head>
@@ -44,7 +53,7 @@
     <!-- コントロールパネル -->
     <div class="bg-white p-5 rounded-2xl shadow-md w-full max-w-6xl mb-4 flex flex-wrap gap-4 items-center justify-between">
         <h1 class="text-xl font-bold text-slate-800 flex items-center gap-2">
-            📝 原稿用紙エディタ
+            📝 原稿用紙エディタ (iPad対応版)
         </h1>
         
         <div class="flex flex-wrap gap-3 items-center text-sm">
@@ -126,7 +135,7 @@
 
     <!-- 原稿用紙表示エリア -->
     <div class="bg-white p-6 rounded-2xl shadow-xl w-full max-w-6xl h-[65vh] overflow-auto flex flex-col items-center border border-slate-200 gap-8">
-        <div id="pdfArea" class="bg-white flex flex-col items-center w-full">
+        <div id="pdfArea" class="bg-white flex flex-col items-center w-full p-4">
             <div id="pagesContainer" class="flex flex-col items-center gap-8 w-full"></div>
         </div>
     </div>
@@ -155,7 +164,7 @@
 
             for (let p = 0; p < pageCount; p++) {
                 const pageWrapper = document.createElement('div');
-                pageWrapper.className = 'genkou-page-wrapper flex flex-col items-center bg-white p-4 shadow-sm relative';
+                pageWrapper.className = 'genkou-page-wrapper flex flex-col items-center shadow-sm relative rounded-xl border border-slate-200';
                 pageWrapper.style.width = 'fit-content';
 
                 const pageNumLabel = document.createElement('div');
@@ -168,7 +177,8 @@
                 gridContainer.style.display = 'flex';
                 gridContainer.style.backgroundColor = 'white';
                 gridContainer.style.border = '2px solid #333';
-                gridContainer.style.boxSizing = 'border-box';
+                gridContainer.style.boxSizing = 'content-box';
+                gridContainer.style.padding = '4px';
 
                 if (writingMode === 'vertical-rl') {
                     gridContainer.style.writingMode = 'vertical-rl';
@@ -191,19 +201,29 @@
 
                     const rowCells = [];
                     for (let j = 0; j < secondaryMax; j++) {
-                        const cell = document.createElement('input');
-                        cell.type = 'text';
-                        cell.maxLength = 1;
+                        const cell = document.createElement('div');
+                        cell.contentEditable = true;
                         cell.className = 'genkou-cell';
                         
                         cell.addEventListener('input', (e) => {
-                            if (e.target.value.length === 1) {
+                            let text = cell.textContent;
+                            if (text.length > 1) {
+                                cell.textContent = text.slice(-1);
+                                // カーソルを末尾に維持
+                                const range = document.createRange();
+                                const sel = window.getSelection();
+                                range.selectNodeContents(cell);
+                                range.collapse(false);
+                                sel.removeAllRanges();
+                                sel.addRange(range);
+                            }
+                            if (cell.textContent.length === 1) {
                                 focusNextCell(p, i, j, primaryMax, secondaryMax);
                             }
                         });
 
                         cell.addEventListener('keydown', (e) => {
-                            handleKeyNavigation(e, p, i, j, primaryMax, secondaryMax, writingMode);
+                            handleKeyNavigation(e, p, i, j, primaryMax, secondaryMax, writingMode, cell);
                         });
 
                         lineDiv.appendChild(cell);
@@ -229,7 +249,7 @@
             }
         }
 
-        function handleKeyNavigation(e, p, r, c, maxR, maxC, mode) {
+        function handleKeyNavigation(e, p, r, c, maxR, maxC, mode, cell) {
             let targetP = p;
             let targetR = r;
             let targetC = c;
@@ -272,10 +292,16 @@
                     targetR = 0;
                     targetC = 0;
                 }
-            } else if (e.key === 'Backspace' && e.target.value === '') {
+            } else if (e.key === 'Backspace' && cell.textContent === '') {
+                e.preventDefault();
                 if (c > 0) targetC = c - 1;
                 else if (r > 0) { targetR = r - 1; targetC = maxC - 1; }
                 else if (p > 0) { targetP--; targetR = maxR - 1; targetC = maxC - 1; }
+                
+                const targetCell = allPagesCells[targetP][targetR][targetC];
+                targetCell.textContent = '';
+                targetCell.focus();
+                return;
             }
 
             if (targetP !== p || targetR !== r || targetC !== c) {
@@ -322,7 +348,7 @@
             for (let page of allPagesCells) {
                 for (let row of page) {
                     for (let cell of row) {
-                        cell.value = '';
+                        cell.textContent = '';
                     }
                 }
             }
@@ -343,7 +369,7 @@
                 }
 
                 if (p >= allPagesCells.length) break;
-                allPagesCells[p][r][c].value = char;
+                allPagesCells[p][r][c].textContent = char;
 
                 c++;
                 if (c >= secondaryMax) {
@@ -365,7 +391,7 @@
                 for (let i = 0; i < pageCells.length; i++) {
                     let lineText = '';
                     for (let j = 0; j < pageCells[i].length; j++) {
-                        const val = pageCells[i][j].value;
+                        const val = pageCells[i][j].textContent;
                         lineText += val ? val : '　';
                     }
                     fullText += lineText.trimEnd() + '\n';
@@ -374,30 +400,11 @@
             document.getElementById('bulkText').value = fullText.trim();
         });
 
-        // PDF保存機能（入力欄を一時的にテキストに置換して確実に綺麗に保存）
+        // PDF保存機能
         document.getElementById('savePdf').addEventListener('click', () => {
-            const inputs = document.querySelectorAll('input.genkou-cell');
-            const replacements = [];
-
-            // 保存の瞬間だけ input を div（テキスト描画）に置き換え
-            inputs.forEach(input => {
-                const val = input.value;
-                const div = document.createElement('div');
-                div.className = input.className;
-                div.style.cssText = input.style.cssText;
-                div.style.display = 'flex';
-                div.style.alignItems = 'center';
-                div.style.justifyContent = 'center';
-                div.style.backgroundColor = 'transparent';
-                div.textContent = val;
-                
-                input.parentNode.replaceChild(div, input);
-                replacements.push({ div, input, val });
-            });
-
             const element = document.getElementById('pdfArea');
             const opt = {
-                margin:       5,
+                margin:       10,
                 filename:     'genkou_youshi.pdf',
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { scale: 2, useCORS: true, logging: false },
@@ -405,19 +412,7 @@
                 pagebreak:    { mode: ['css', 'legacy'], avoid: '.genkou-page-wrapper' }
             };
 
-            html2pdf().from(element).set(opt).save().then(() => {
-                // 保存完了後、瞬時に元の入力欄に戻す
-                replacements.forEach(r => {
-                    r.div.parentNode.replaceChild(r.input, r.div);
-                    r.input.value = r.val;
-                });
-            }).catch(() => {
-                // エラー時も元に戻す
-                replacements.forEach(r => {
-                    r.div.parentNode.replaceChild(r.input, r.div);
-                    r.input.value = r.val;
-                });
-            });
+            html2pdf().from(element).set(opt).save();
         });
 
         document.getElementById('updateGrid').addEventListener('click', generateGrid);
